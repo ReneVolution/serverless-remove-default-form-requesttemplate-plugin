@@ -1,0 +1,1135 @@
+{
+  "ServerlessDeploymentBucket": {
+    "Type": "AWS::S3::Bucket",
+    "Properties": {
+      "BucketEncryption": {
+        "ServerSideEncryptionConfiguration": [
+          {
+            "ServerSideEncryptionByDefault": {
+              "SSEAlgorithm": "AES256"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ServerlessDeploymentBucketPolicy": {
+    "Type": "AWS::S3::BucketPolicy",
+    "Properties": {
+      "Bucket": {
+        "Ref": "ServerlessDeploymentBucket"
+      },
+      "PolicyDocument": {
+        "Statement": [
+          {
+            "Action": "s3:*",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Resource": [
+              {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            ],
+            "Condition": {
+              "Bool": {
+                "aws:SecureTransport": false
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "GetJobLogGroup": {
+    "Type": "AWS::Logs::LogGroup",
+    "Properties": {
+      "LogGroupName": "/aws/lambda/templater-farm-dev-getJob"
+    }
+  },
+  "PostJobLogGroup": {
+    "Type": "AWS::Logs::LogGroup",
+    "Properties": {
+      "LogGroupName": "/aws/lambda/templater-farm-dev-postJob"
+    }
+  },
+  "UpdateJobStatusLogGroup": {
+    "Type": "AWS::Logs::LogGroup",
+    "Properties": {
+      "LogGroupName": "/aws/lambda/templater-farm-dev-updateJobStatus"
+    }
+  },
+  "IamRoleLambdaExecution": {
+    "Type": "AWS::IAM::Role",
+    "Properties": {
+      "AssumeRolePolicyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [
+                "lambda.amazonaws.com"
+              ]
+            },
+            "Action": [
+              "sts:AssumeRole"
+            ]
+          }
+        ]
+      },
+      "Policies": [
+        {
+          "PolicyName": {
+            "Fn::Join": [
+              "-",
+              [
+                "dev",
+                "templater-farm",
+                "lambda"
+              ]
+            ]
+          },
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogStream",
+                  "logs:CreateLogGroup"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/templater-farm-dev*:*"
+                  }
+                ]
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:PutLogEvents"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/templater-farm-dev*:*:*"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "Path": "/",
+      "RoleName": {
+        "Fn::Join": [
+          "-",
+          [
+            "templater-farm",
+            "dev",
+            {
+              "Ref": "AWS::Region"
+            },
+            "lambdaRole"
+          ]
+        ]
+      }
+    }
+  },
+  "GetJobLambdaFunction": {
+    "Type": "AWS::Lambda::Function",
+    "Properties": {
+      "Code": {
+        "S3Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "S3Key": "serverless/templater-farm/dev/1579113248224-2020-01-15T18:34:08.224Z/templater-farm.zip"
+      },
+      "FunctionName": "templater-farm-dev-getJob",
+      "Handler": "handler.hello",
+      "MemorySize": 1024,
+      "Role": {
+        "Fn::GetAtt": [
+          "IamRoleLambdaExecution",
+          "Arn"
+        ]
+      },
+      "Runtime": "nodejs12.x",
+      "Timeout": 6,
+      "Tags": [
+        {
+          "Key": "service",
+          "Value": "templater-farm"
+        },
+        {
+          "Key": "project",
+          "Value": "Turing"
+        },
+        {
+          "Key": "stage",
+          "Value": "dev"
+        }
+      ]
+    },
+    "DependsOn": [
+      "GetJobLogGroup",
+      "IamRoleLambdaExecution"
+    ]
+  },
+  "GetJobLambdaVersion5NP18hK3eQE8koy7ydeob2NraSl614X0bWrG8nGq17o": {
+    "Type": "AWS::Lambda::Version",
+    "DeletionPolicy": "Retain",
+    "Properties": {
+      "FunctionName": {
+        "Ref": "GetJobLambdaFunction"
+      },
+      "CodeSha256": "pEEdEbmNKoqhLMEK+vi3CUMYmojRxBaKFn1nBPQm8Qk="
+    }
+  },
+  "PostJobLambdaFunction": {
+    "Type": "AWS::Lambda::Function",
+    "Properties": {
+      "Code": {
+        "S3Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "S3Key": "serverless/templater-farm/dev/1579113248224-2020-01-15T18:34:08.224Z/templater-farm.zip"
+      },
+      "FunctionName": "templater-farm-dev-postJob",
+      "Handler": "handler.hello",
+      "MemorySize": 1024,
+      "Role": {
+        "Fn::GetAtt": [
+          "IamRoleLambdaExecution",
+          "Arn"
+        ]
+      },
+      "Runtime": "nodejs12.x",
+      "Timeout": 6,
+      "Tags": [
+        {
+          "Key": "service",
+          "Value": "templater-farm"
+        },
+        {
+          "Key": "project",
+          "Value": "Turing"
+        },
+        {
+          "Key": "stage",
+          "Value": "dev"
+        }
+      ]
+    },
+    "DependsOn": [
+      "PostJobLogGroup",
+      "IamRoleLambdaExecution"
+    ]
+  },
+  "PostJobLambdaVersionX2Jp9yYT5LZPVxzPHaYF5QUOJem7ZGceV4VBsgCSE18": {
+    "Type": "AWS::Lambda::Version",
+    "DeletionPolicy": "Retain",
+    "Properties": {
+      "FunctionName": {
+        "Ref": "PostJobLambdaFunction"
+      },
+      "CodeSha256": "pEEdEbmNKoqhLMEK+vi3CUMYmojRxBaKFn1nBPQm8Qk="
+    }
+  },
+  "UpdateJobStatusLambdaFunction": {
+    "Type": "AWS::Lambda::Function",
+    "Properties": {
+      "Code": {
+        "S3Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "S3Key": "serverless/templater-farm/dev/1579113248224-2020-01-15T18:34:08.224Z/templater-farm.zip"
+      },
+      "FunctionName": "templater-farm-dev-updateJobStatus",
+      "Handler": "handler.hello",
+      "MemorySize": 1024,
+      "Role": {
+        "Fn::GetAtt": [
+          "IamRoleLambdaExecution",
+          "Arn"
+        ]
+      },
+      "Runtime": "nodejs12.x",
+      "Timeout": 6,
+      "Tags": [
+        {
+          "Key": "service",
+          "Value": "templater-farm"
+        },
+        {
+          "Key": "project",
+          "Value": "Turing"
+        },
+        {
+          "Key": "stage",
+          "Value": "dev"
+        }
+      ]
+    },
+    "DependsOn": [
+      "UpdateJobStatusLogGroup",
+      "IamRoleLambdaExecution"
+    ]
+  },
+  "UpdateJobStatusLambdaVersionKc1XMRfPxr2BKRKTXwDmpdnFrQ1wnTDeAYw7AwL5E": {
+    "Type": "AWS::Lambda::Version",
+    "DeletionPolicy": "Retain",
+    "Properties": {
+      "FunctionName": {
+        "Ref": "UpdateJobStatusLambdaFunction"
+      },
+      "CodeSha256": "pEEdEbmNKoqhLMEK+vi3CUMYmojRxBaKFn1nBPQm8Qk="
+    }
+  },
+  "ApiGatewayRestApi": {
+    "Type": "AWS::ApiGateway::RestApi",
+    "Properties": {
+      "Name": "dev-templater-farm",
+      "EndpointConfiguration": {
+        "Types": [
+          "EDGE"
+        ]
+      },
+      "Policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "execute-api:Invoke",
+            "Resource": [
+              "execute-api:/*/*/*"
+            ],
+            "Condition": {
+              "IpAddress": {
+                "aws:SourceIp": [
+                  "0.0.0.0/0",
+                  "::/0"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ApiGatewayResourceJobs": {
+    "Type": "AWS::ApiGateway::Resource",
+    "Properties": {
+      "ParentId": {
+        "Fn::GetAtt": [
+          "ApiGatewayRestApi",
+          "RootResourceId"
+        ]
+      },
+      "PathPart": "jobs",
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      }
+    }
+  },
+  "ApiGatewayResourceJobsJobidVar": {
+    "Type": "AWS::ApiGateway::Resource",
+    "Properties": {
+      "ParentId": {
+        "Ref": "ApiGatewayResourceJobs"
+      },
+      "PathPart": "{jobId}",
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      }
+    }
+  },
+  "ApiGatewayResourceJobsJobidVarStatus": {
+    "Type": "AWS::ApiGateway::Resource",
+    "Properties": {
+      "ParentId": {
+        "Ref": "ApiGatewayResourceJobsJobidVar"
+      },
+      "PathPart": "status",
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      }
+    }
+  },
+  "ApiGatewayMethodJobsGet": {
+    "Type": "AWS::ApiGateway::Method",
+    "Properties": {
+      "HttpMethod": "GET",
+      "RequestParameters": {},
+      "ResourceId": {
+        "Ref": "ApiGatewayResourceJobs"
+      },
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "ApiKeyRequired": false,
+      "AuthorizationType": "NONE",
+      "Integration": {
+        "IntegrationHttpMethod": "POST",
+        "Type": "AWS",
+        "Uri": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":apigateway:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":lambda:path/2015-03-31/functions/",
+              {
+                "Fn::GetAtt": [
+                  "GetJobLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "/invocations"
+            ]
+          ]
+        },
+        "PassthroughBehavior": "NEVER",
+        "RequestTemplates": {
+          "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  ",
+          "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
+        },
+        "IntegrationResponses": [
+          {
+            "StatusCode": 200,
+            "SelectionPattern": "",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 400,
+            "SelectionPattern": "[\\s\\S]*\\[400\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 401,
+            "SelectionPattern": "[\\s\\S]*\\[401\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 403,
+            "SelectionPattern": "[\\s\\S]*\\[403\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 404,
+            "SelectionPattern": "[\\s\\S]*\\[404\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 422,
+            "SelectionPattern": "[\\s\\S]*\\[422\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 500,
+            "SelectionPattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 502,
+            "SelectionPattern": "[\\s\\S]*\\[502\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 504,
+            "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          }
+        ]
+      },
+      "MethodResponses": [
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 200
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 400
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 401
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 403
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 404
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 422
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 500
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 502
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 504
+        }
+      ]
+    }
+  },
+  "ApiGatewayMethodJobsPostApplicationJsonModel": {
+    "Type": "AWS::ApiGateway::Model",
+    "Properties": {
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "ContentType": "application/json",
+      "Schema": {
+        "definitions": {},
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "title": "Job Schema",
+        "required": [
+          "aep",
+          "dynamicLayers",
+          "output"
+        ],
+        "properties": {
+          "externalId": {
+            "type": "string"
+          },
+          "aep": {
+            "type": "string"
+          },
+          "dynamicLayers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "audio",
+                    "video",
+                    "text"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "destination": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "S3"
+                    ]
+                  },
+                  "bucket": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "ApiGatewayMethodJobsPostValidator": {
+    "Type": "AWS::ApiGateway::RequestValidator",
+    "Properties": {
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "ValidateRequestBody": true,
+      "ValidateRequestParameters": true
+    }
+  },
+  "ApiGatewayMethodJobsPost": {
+    "Type": "AWS::ApiGateway::Method",
+    "Properties": {
+      "HttpMethod": "POST",
+      "RequestParameters": {},
+      "ResourceId": {
+        "Ref": "ApiGatewayResourceJobs"
+      },
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "ApiKeyRequired": false,
+      "AuthorizationType": "NONE",
+      "Integration": {
+        "IntegrationHttpMethod": "POST",
+        "Type": "AWS",
+        "Uri": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":apigateway:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":lambda:path/2015-03-31/functions/",
+              {
+                "Fn::GetAtt": [
+                  "PostJobLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "/invocations"
+            ]
+          ]
+        },
+        "PassthroughBehavior": "NEVER",
+        "RequestTemplates": {
+          "application/json": "{ \"body\" : $input.body }",
+          "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
+        },
+        "IntegrationResponses": [
+          {
+            "StatusCode": 200,
+            "SelectionPattern": "",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 400,
+            "SelectionPattern": "[\\s\\S]*\\[400\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 401,
+            "SelectionPattern": "[\\s\\S]*\\[401\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 403,
+            "SelectionPattern": "[\\s\\S]*\\[403\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 404,
+            "SelectionPattern": "[\\s\\S]*\\[404\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 422,
+            "SelectionPattern": "[\\s\\S]*\\[422\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 500,
+            "SelectionPattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 502,
+            "SelectionPattern": "[\\s\\S]*\\[502\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 504,
+            "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          }
+        ]
+      },
+      "MethodResponses": [
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 200
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 400
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 401
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 403
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 404
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 422
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 500
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 502
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 504
+        }
+      ],
+      "RequestValidatorId": {
+        "Ref": "ApiGatewayMethodJobsPostValidator"
+      },
+      "RequestModels": {
+        "application/json": {
+          "Ref": "ApiGatewayMethodJobsPostApplicationJsonModel"
+        }
+      }
+    }
+  },
+  "ApiGatewayMethodJobsJobidVarStatusPostApplicationJsonModel": {
+    "Type": "AWS::ApiGateway::Model",
+    "Properties": {
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "ContentType": "application/json",
+      "Schema": {
+        "definitions": {},
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "title": "Job Schema",
+        "required": [
+          "aep",
+          "dynamicLayers",
+          "output"
+        ],
+        "properties": {
+          "externalId": {
+            "type": "string"
+          },
+          "aep": {
+            "type": "string"
+          },
+          "dynamicLayers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "audio",
+                    "video",
+                    "text"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "destination": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "S3"
+                    ]
+                  },
+                  "bucket": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "ApiGatewayMethodJobsJobidVarStatusPostValidator": {
+    "Type": "AWS::ApiGateway::RequestValidator",
+    "Properties": {
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "ValidateRequestBody": true,
+      "ValidateRequestParameters": true
+    }
+  },
+  "ApiGatewayMethodJobsJobidVarStatusPost": {
+    "Type": "AWS::ApiGateway::Method",
+    "Properties": {
+      "HttpMethod": "POST",
+      "RequestParameters": {},
+      "ResourceId": {
+        "Ref": "ApiGatewayResourceJobsJobidVarStatus"
+      },
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "ApiKeyRequired": false,
+      "AuthorizationType": "NONE",
+      "Integration": {
+        "IntegrationHttpMethod": "POST",
+        "Type": "AWS",
+        "Uri": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":apigateway:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":lambda:path/2015-03-31/functions/",
+              {
+                "Fn::GetAtt": [
+                  "UpdateJobStatusLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "/invocations"
+            ]
+          ]
+        },
+        "PassthroughBehavior": "NEVER",
+        "RequestTemplates": {
+          "application/json": "{ \"body\" : $input.body }",
+          "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
+        },
+        "IntegrationResponses": [
+          {
+            "StatusCode": 200,
+            "SelectionPattern": "",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 400,
+            "SelectionPattern": "[\\s\\S]*\\[400\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 401,
+            "SelectionPattern": "[\\s\\S]*\\[401\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 403,
+            "SelectionPattern": "[\\s\\S]*\\[403\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 404,
+            "SelectionPattern": "[\\s\\S]*\\[404\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 422,
+            "SelectionPattern": "[\\s\\S]*\\[422\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 500,
+            "SelectionPattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 502,
+            "SelectionPattern": "[\\s\\S]*\\[502\\][\\s\\S]*",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          },
+          {
+            "StatusCode": 504,
+            "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
+            "ResponseParameters": {},
+            "ResponseTemplates": {}
+          }
+        ]
+      },
+      "MethodResponses": [
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 200
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 400
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 401
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 403
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 404
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 422
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 500
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 502
+        },
+        {
+          "ResponseParameters": {},
+          "ResponseModels": {},
+          "StatusCode": 504
+        }
+      ],
+      "RequestValidatorId": {
+        "Ref": "ApiGatewayMethodJobsJobidVarStatusPostValidator"
+      },
+      "RequestModels": {
+        "application/json": {
+          "Ref": "ApiGatewayMethodJobsJobidVarStatusPostApplicationJsonModel"
+        }
+      }
+    }
+  },
+  "ApiGatewayDeployment1579113225408": {
+    "Type": "AWS::ApiGateway::Deployment",
+    "Properties": {
+      "RestApiId": {
+        "Ref": "ApiGatewayRestApi"
+      },
+      "StageName": "dev"
+    },
+    "DependsOn": [
+      "ApiGatewayMethodJobsGet",
+      "ApiGatewayMethodJobsPost",
+      "ApiGatewayMethodJobsJobidVarStatusPost"
+    ]
+  },
+  "GetJobLambdaPermissionApiGateway": {
+    "Type": "AWS::Lambda::Permission",
+    "Properties": {
+      "FunctionName": {
+        "Fn::GetAtt": [
+          "GetJobLambdaFunction",
+          "Arn"
+        ]
+      },
+      "Action": "lambda:InvokeFunction",
+      "Principal": "apigateway.amazonaws.com",
+      "SourceArn": {
+        "Fn::Join": [
+          "",
+          [
+            "arn:",
+            {
+              "Ref": "AWS::Partition"
+            },
+            ":execute-api:",
+            {
+              "Ref": "AWS::Region"
+            },
+            ":",
+            {
+              "Ref": "AWS::AccountId"
+            },
+            ":",
+            {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "/*/*"
+          ]
+        ]
+      }
+    }
+  },
+  "PostJobLambdaPermissionApiGateway": {
+    "Type": "AWS::Lambda::Permission",
+    "Properties": {
+      "FunctionName": {
+        "Fn::GetAtt": [
+          "PostJobLambdaFunction",
+          "Arn"
+        ]
+      },
+      "Action": "lambda:InvokeFunction",
+      "Principal": "apigateway.amazonaws.com",
+      "SourceArn": {
+        "Fn::Join": [
+          "",
+          [
+            "arn:",
+            {
+              "Ref": "AWS::Partition"
+            },
+            ":execute-api:",
+            {
+              "Ref": "AWS::Region"
+            },
+            ":",
+            {
+              "Ref": "AWS::AccountId"
+            },
+            ":",
+            {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "/*/*"
+          ]
+        ]
+      }
+    }
+  },
+  "UpdateJobStatusLambdaPermissionApiGateway": {
+    "Type": "AWS::Lambda::Permission",
+    "Properties": {
+      "FunctionName": {
+        "Fn::GetAtt": [
+          "UpdateJobStatusLambdaFunction",
+          "Arn"
+        ]
+      },
+      "Action": "lambda:InvokeFunction",
+      "Principal": "apigateway.amazonaws.com",
+      "SourceArn": {
+        "Fn::Join": [
+          "",
+          [
+            "arn:",
+            {
+              "Ref": "AWS::Partition"
+            },
+            ":execute-api:",
+            {
+              "Ref": "AWS::Region"
+            },
+            ":",
+            {
+              "Ref": "AWS::AccountId"
+            },
+            ":",
+            {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "/*/*"
+          ]
+        ]
+      }
+    }
+  }
+}
