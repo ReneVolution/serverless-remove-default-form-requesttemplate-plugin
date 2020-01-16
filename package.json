@@ -1,6 +1,6 @@
 {
   "name": "serverless-remove-default-form-requesttemplate-plugin",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Serverless Plugin to remove the default x-www-form-urlencoded request template. ",
   "main": "dist/index.js",
   "scripts": {
