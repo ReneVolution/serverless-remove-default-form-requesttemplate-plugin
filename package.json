@@ -1,6 +1,11 @@
 {
   "name": "serverless-remove-default-form-requesttemplate-plugin",
   "version": "1.0.0",
+  "keywords": [
+    "aws",
+    "serverless",
+    "plugin"
+  ],
   "description": "Serverless Plugin to remove the default application/x-www-form-urlencoded request templates from AWS API Methods. ",
   "main": "dist/index.js",
   "scripts": {
